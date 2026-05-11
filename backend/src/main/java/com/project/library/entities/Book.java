@@ -23,7 +23,8 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, LocalDate publishedDate) {
+    public Book(UUID id, String title, String author, LocalDate publishedDate) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.publishedDate = publishedDate;
