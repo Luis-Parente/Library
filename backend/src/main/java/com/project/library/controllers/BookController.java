@@ -17,7 +17,8 @@ import com.project.library.services.BookService;
 
 import jakarta.validation.Valid;
 
-import com.project.library.dto.BookDTO;
+import com.project.library.dto.RequestBookDTO;
+import com.project.library.dto.ResponseBookDTO;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,27 +35,27 @@ public class BookController {
     }
 
     @PostMapping(produces = "application/json")
-    public ResponseEntity<BookDTO> registerBook(@RequestBody @Valid BookDTO newBook) {
-        BookDTO result = bookService.createBook(newBook);
+    public ResponseEntity<ResponseBookDTO> registerBook(@RequestBody @Valid RequestBookDTO newBook) {
+        ResponseBookDTO result = bookService.createBook(newBook);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{uuid}").buildAndExpand(result.id()).toUri();
         return ResponseEntity.created(uri).body(result);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<BookDTO> getBookById(@PathVariable UUID id) {
-        BookDTO result = bookService.getBookById(id);
+    public ResponseEntity<ResponseBookDTO> getBookById(@PathVariable UUID id) {
+        ResponseBookDTO result = bookService.getBookById(id);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<Page<BookDTO>> getAllBooks(Pageable pageable) {
-        Page<BookDTO> result = bookService.getAllBooks(pageable);
+    public ResponseEntity<Page<ResponseBookDTO>> getAllBooks(Pageable pageable) {
+        Page<ResponseBookDTO> result = bookService.getAllBooks(pageable);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<BookDTO> updateBook(@PathVariable UUID id, @RequestBody @Valid BookDTO bookDto) {
-        BookDTO result = bookService.updateBook(id, bookDto);
+    public ResponseEntity<ResponseBookDTO> updateBook(@PathVariable UUID id, @RequestBody @Valid RequestBookDTO bookDto) {
+        ResponseBookDTO result = bookService.updateBook(id, bookDto);
         return ResponseEntity.ok(result);
     }
 
