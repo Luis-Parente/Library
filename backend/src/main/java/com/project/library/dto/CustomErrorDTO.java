@@ -1,4 +1,17 @@
 package com.project.library.dto;
 
-public record CustomErrorDTO(Integer status, String message, String path) {
+import java.time.Instant;
+import java.util.List;
+
+public record CustomErrorDTO(
+        Instant timestamp,
+        Integer status,
+        String message,
+        String path,
+        List<FieldError> fieldErrors) {
+
+    public record FieldError(
+            String field,
+            String message) {
+    }
 }
