@@ -5,13 +5,13 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.library.dto.BookDTO;
 import com.project.library.entities.Book;
+import com.project.library.exceptions.EntityNotFoundException;
 import com.project.library.mappers.BookMapper;
 import com.project.library.repositories.BookRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class BookService {
@@ -32,15 +32,13 @@ public class BookService {
         return bookMapper.toDTO(savedBook);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public BookDTO getBookById(UUID id) {
-        BookDTO result = bookRepository.findById(id)
-                .map(bookMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
-
+        BookDTO result = bookMapper.toDTO(getBookEntityById(id));
         return result;
     }
 
+    @Transactional(readOnly = true)
     public Page<BookDTO> getAllBooks(Pageable pageable) {
         Page<Book> pagedBooks = bookRepository.findAll(pageable);
 
@@ -49,8 +47,7 @@ public class BookService {
 
     @Transactional
     public BookDTO updateBook(UUID id, BookDTO bookDto) {
-        Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+        Book existingBook = getBookEntityById(id);
 
         existingBook.setTitle(bookDto.title());
         existingBook.setAuthor(bookDto.author());
@@ -62,12 +59,14 @@ public class BookService {
     }
 
     @Transactional
-    public String deleteBook(UUID id) {
-        if (!bookRepository.existsById(id)) {
-            throw new RuntimeException("Book not found");
-        }
-        bookRepository.deleteById(id);
+    public void deleteBook(UUID id) {
+        Book book = getBookEntityById(id);
 
-        return "Book deleted successfully";
+        bookRepository.delete(book);
+    }
+
+    private Book getBookEntityById(UUID id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found!"));
     }
 }

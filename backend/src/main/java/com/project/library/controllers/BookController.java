@@ -59,8 +59,8 @@ public class BookController {
     }
 
     @DeleteMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<String> deleteBook(@PathVariable UUID id) {
-        String result = bookService.deleteBook(id);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Void> deleteBook(@PathVariable UUID id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 }
