@@ -18,12 +18,11 @@ public class BookMapper {
     }
 
     public Book toEntity(RequestBookDTO bookDTO) {
-        Book book = new Book(
-            null, 
-            bookDTO.title(), 
-            bookDTO.author(), 
-            bookDTO.publishedDate());
+        return new Book(
+                null,
+                bookDTO.title(),
+                bookDTO.author(),
+                bookDTO.publishedDate());
 
-        return book;
     }
 }

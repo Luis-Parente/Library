@@ -16,5 +16,4 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info().title("LibraryAPI").description("Reference documentation of API")
                 .version("v0.0.1"));
     }
-
 }

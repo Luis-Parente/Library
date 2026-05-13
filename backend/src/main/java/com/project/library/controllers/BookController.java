@@ -52,7 +52,8 @@ public class BookController {
     @PostMapping(produces = "application/json")
     public ResponseEntity<ResponseBookDTO> registerBook(@RequestBody @Valid RequestBookDTO newBook) {
         ResponseBookDTO result = bookService.createBook(newBook);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{uuid}").buildAndExpand(result.id())
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{uuid}")
+                .buildAndExpand(result.id())
                 .toUri();
         return ResponseEntity.created(uri).body(result);
     }
