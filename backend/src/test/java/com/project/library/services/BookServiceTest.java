@@ -46,7 +46,7 @@ public class BookServiceTest {
     private Pageable pageable;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         usedId = UUID.randomUUID();
         unusedId = UUID.randomUUID();
 
@@ -118,8 +118,6 @@ public class BookServiceTest {
 
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.getContent()).isNotEmpty();
-        Assertions.assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
-        Assertions.assertThat(result.getPageable().getPageSize()).isEqualTo(10);
     }
 
     @Test

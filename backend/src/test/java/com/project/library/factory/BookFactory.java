@@ -51,4 +51,18 @@ public class BookFactory {
                 BOOK_AUTHOR,
                 BOOK_PUBLISHED_DATE);
     }
+
+    public static RequestBookDTO createRequestDtoWithInvalidTitle(String invalidTitle) {
+        return new RequestBookDTO(
+                invalidTitle,
+                BOOK_AUTHOR,
+                BOOK_PUBLISHED_DATE);
+    }
+
+    public static RequestBookDTO createRequestDtoWithInvalidAuthor(String invalidAuthor) {
+        return new RequestBookDTO(
+                BOOK_TITLE,
+                invalidAuthor,
+                BOOK_PUBLISHED_DATE);
+    }
 }
