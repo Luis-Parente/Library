@@ -81,7 +81,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when blank title is provided")
     public void registerBookShouldReturnBadRequestWhenBlankTitleIsProvided() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle("");
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -93,7 +93,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when blank author is provided")
     public void registerBookShouldReturnBadRequestWhenBlankAuthorIsProvided() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor("");
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -105,7 +105,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when title has less than 2 characters")
     public void registerBookShouldReturnBadRequestWhenTitleHasLessThan2Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle(STRING_WITH_1_CHARACTER);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_1_CHARACTER);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -117,7 +117,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when author has less than 2 characters")
     public void registerBookShouldReturnBadRequestWhenAuthorHasLessThan2Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor(STRING_WITH_1_CHARACTER);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_1_CHARACTER);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -129,7 +129,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when title has more than 100 characters")
     public void registerBookShouldReturnBadRequestWhenTitleHasMoreThan100Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle(STRING_WITH_101_CHARACTERS);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -141,7 +141,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("registerBook - should return BadRequest when author has more than 100 characters")
     public void registerBookShouldReturnBadRequestWhenAuthorHasMoreThan100Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor(STRING_WITH_101_CHARACTERS);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(post("/books")
@@ -221,7 +221,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when blank title is provided")
     public void updateBookShouldReturnBadRequestWhenBlankTitleIsProvided() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle("");
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
@@ -233,7 +233,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when blank author is provided")
     public void updateBookShouldReturnBadRequestWhenBlankAuthorIsProvided() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor("");
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
@@ -245,7 +245,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when title has less than 2 characters")
     public void updateBookShouldReturnBadRequestWhenTitleHasLessThanTwoCharacters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle(STRING_WITH_1_CHARACTER);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_1_CHARACTER);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
@@ -257,7 +257,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when author has less than 2 characters")
     public void updateBookShouldReturnBadRequestWhenAuthorHasLessThanTwoCharacters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor(STRING_WITH_1_CHARACTER);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_1_CHARACTER);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
@@ -269,7 +269,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when title has more than 100 characters")
     public void updateBookShouldReturnBadRequestWhenTitleHasMoreThan100Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidTitle(STRING_WITH_101_CHARACTERS);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
@@ -281,7 +281,7 @@ public class BookControllerTest {
     @Test
     @DisplayName("updateBook - should return BadRequest when author has more than 100 characters")
     public void updateBookShouldReturnBadRequestWhenAuthorHasMoreThan100Characters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestDtoWithInvalidAuthor(STRING_WITH_101_CHARACTERS);
+        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
         mockMvc.perform(put("/books/{id}", validBookId.toString())
