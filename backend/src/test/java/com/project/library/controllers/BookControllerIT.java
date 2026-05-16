@@ -1,34 +1,31 @@
 package com.project.library.controllers;
 
-import java.util.List;
-import java.util.UUID;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.library.dto.RequestBookDTO;
-import com.project.library.dto.ResponseBookDTO;
-import com.project.library.exceptions.EntityNotFoundException;
 import com.project.library.factory.BookFactory;
-import com.project.library.services.BookService;
 
 import tools.jackson.databind.ObjectMapper;
 
-@WebMvcTest(BookController.class)
-public class BookControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+public class BookControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,48 +33,45 @@ public class BookControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private BookService bookService;
-
-    private RequestBookDTO requestBookDTO, invalidRequestBookDTO;
-    private ResponseBookDTO responseBookDTO;
+    private RequestBookDTO requestBookDTO, updatedRequestBookDTO, invalidRequestBookDTO;
     private UUID validBookId, invalidBookId;
-    private PageImpl<ResponseBookDTO> pageOfBooks;
-    private Pageable pageable;
 
     private static final String BASE_URL = "/books";
-
     private static final String STRING_WITH_1_CHARACTER = "L";
     private static final String STRING_WITH_101_CHARACTERS = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the i";
 
     @BeforeEach
-    public void setup() {
-        validBookId = UUID.randomUUID();
+    public void setUp() throws Exception {
+        requestBookDTO = BookFactory.createRequestBookDTO();
+        updatedRequestBookDTO = BookFactory.createRequestBookDto("Updated Title", "Updated Author", LocalDate.of(2020, 1, 1));
         invalidBookId = UUID.randomUUID();
 
-        requestBookDTO = BookFactory.createRequestBookDTO();
-        responseBookDTO = BookFactory.createResponseBookDTO(validBookId);
+        String body = objectMapper.writeValueAsString(requestBookDTO);
 
-        pageable = PageRequest.of(0, 10);
-        pageOfBooks = new PageImpl<>(List.of(responseBookDTO), pageable, 1);
+        MvcResult result = mockMvc.perform(post(BASE_URL)
+                .contentType("application/json")
+                .content(body))
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        String id = objectMapper.readTree(responseBody).get("id").asString();
+        validBookId = UUID.fromString(id);
     }
 
     @Test
     @DisplayName("registerBook - should return ResponseBookDTO when valid data is provided")
     public void registerBookShouldReturnResponseBookDTOWhenValidDataIsProvided() throws Exception {
-        Mockito.when(bookService.createBook(Mockito.any(RequestBookDTO.class))).thenReturn(responseBookDTO);
-
-        String body = objectMapper.writeValueAsString(requestBookDTO);
+        RequestBookDTO newBook = BookFactory.createRequestBookDTO();
+        String body = objectMapper.writeValueAsString(newBook);
 
         mockMvc.perform(post(BASE_URL)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(validBookId.toString()))
-                .andExpect(jsonPath("$.title").value(requestBookDTO.title()))
-                .andExpect(jsonPath("$.author").value(requestBookDTO.author()))
-                .andExpect(jsonPath("$.publishedDate")
-                        .value(requestBookDTO.publishedDate().toString()));
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value(newBook.title()))
+                .andExpect(jsonPath("$.author").value(newBook.author()))
+                .andExpect(jsonPath("$.publishedDate").value(newBook.publishedDate().toString()));
     }
 
     @Test
@@ -155,66 +149,52 @@ public class BookControllerTest {
     @Test
     @DisplayName("getBookById - should return ResponseBookDTO when valid id is provided")
     public void getBookByIdShouldReturnResponseBookDTOWhenValidIdIsProvided() throws Exception {
-        Mockito.when(bookService.getBookById(validBookId)).thenReturn(responseBookDTO);
-
-        mockMvc.perform(get(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(get(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(validBookId.toString()))
-                .andExpect(jsonPath("$.title").value(responseBookDTO.title()))
-                .andExpect(jsonPath("$.author").value(responseBookDTO.author()))
-                .andExpect(jsonPath("$.publishedDate")
-                        .value(responseBookDTO.publishedDate().toString()));
+                .andExpect(jsonPath("$.title").value(requestBookDTO.title()))
+                .andExpect(jsonPath("$.author").value(requestBookDTO.author()))
+                .andExpect(jsonPath("$.publishedDate").value(requestBookDTO.publishedDate().toString()));
     }
 
     @Test
     @DisplayName("getBookById - should return NotFound when invalid id is provided")
     public void getBookByIdShouldReturnNotFoundWhenInvalidIdIsProvided() throws Exception {
-        Mockito.doThrow(EntityNotFoundException.class).when(bookService).getBookById(invalidBookId);
-
-        mockMvc.perform(get(BASE_URL + "/{id}", invalidBookId.toString())
+        mockMvc.perform(get(BASE_URL + "/{id}", invalidBookId)
                 .contentType("application/json"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("getAllBooks - should return Page of ResponseBookDTO")
+    @DisplayName("getAllBooks - should return page of ResponseBookDTO")
     public void getAllBooksShouldReturnPageOfResponseBookDTO() throws Exception {
-        Mockito.when(bookService.getAllBooks(Mockito.any())).thenReturn(pageOfBooks);
-
         mockMvc.perform(get(BASE_URL)
                 .contentType("application/json"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("updateBook - should return ResponseBookDTO when valid data is provided")
-    public void updateBookShouldReturnResponseBookDTOWhenValidDataIsProvided() throws Exception {
-        Mockito.when(bookService.updateBook(Mockito.eq(validBookId), Mockito.any(RequestBookDTO.class)))
-                .thenReturn(responseBookDTO);
+    @DisplayName("updateBook - should return updated ResponseBookDTO when valid data is provided")
+    public void updateBookShouldReturnUpdatedResponseBookDTOWhenValidDataIsProvided() throws Exception {
+        String body = objectMapper.writeValueAsString(updatedRequestBookDTO);
 
-        String body = objectMapper.writeValueAsString(requestBookDTO);
-
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(validBookId.toString()))
-                .andExpect(jsonPath("$.title").value(requestBookDTO.title()))
-                .andExpect(jsonPath("$.author").value(requestBookDTO.author()))
-                .andExpect(jsonPath("$.publishedDate")
-                        .value(requestBookDTO.publishedDate().toString()));
+                .andExpect(jsonPath("$.title").value(updatedRequestBookDTO.title()))
+                .andExpect(jsonPath("$.author").value(updatedRequestBookDTO.author()))
+                .andExpect(jsonPath("$.publishedDate").value(updatedRequestBookDTO.publishedDate().toString()));
     }
 
     @Test
     @DisplayName("updateBook - should return NotFound when invalid id is provided")
     public void updateBookShouldReturnNotFoundWhenInvalidIdIsProvided() throws Exception {
-        Mockito.doThrow(EntityNotFoundException.class).when(bookService).updateBook(Mockito.eq(invalidBookId),
-                Mockito.any(RequestBookDTO.class));
+        String body = objectMapper.writeValueAsString(updatedRequestBookDTO);
 
-        String body = objectMapper.writeValueAsString(requestBookDTO);
-
-        mockMvc.perform(put(BASE_URL + "/{id}", invalidBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", invalidBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isNotFound());
@@ -226,7 +206,7 @@ public class BookControllerTest {
         invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isBadRequest());
@@ -238,31 +218,7 @@ public class BookControllerTest {
         invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor("");
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
-                .contentType("application/json")
-                .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("updateBook - should return BadRequest when title has less than 2 characters")
-    public void updateBookShouldReturnBadRequestWhenTitleHasLessThanTwoCharacters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_1_CHARACTER);
-        String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
-
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
-                .contentType("application/json")
-                .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("updateBook - should return BadRequest when author has less than 2 characters")
-    public void updateBookShouldReturnBadRequestWhenAuthorHasLessThanTwoCharacters() throws Exception {
-        invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_1_CHARACTER);
-        String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
-
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isBadRequest());
@@ -274,7 +230,7 @@ public class BookControllerTest {
         invalidRequestBookDTO = BookFactory.createRequestBookDtoWithTitle(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isBadRequest());
@@ -286,7 +242,7 @@ public class BookControllerTest {
         invalidRequestBookDTO = BookFactory.createRequestBookDtoWithAuthor(STRING_WITH_101_CHARACTERS);
         String body = objectMapper.writeValueAsString(invalidRequestBookDTO);
 
-        mockMvc.perform(put(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(put(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json")
                 .content(body))
                 .andExpect(status().isBadRequest());
@@ -295,19 +251,19 @@ public class BookControllerTest {
     @Test
     @DisplayName("deleteBook - should return NoContent when valid id is provided")
     public void deleteBookShouldReturnNoContentWhenValidIdIsProvided() throws Exception {
-        Mockito.doNothing().when(bookService).deleteBook(validBookId);
-
-        mockMvc.perform(delete(BASE_URL + "/{id}", validBookId.toString())
+        mockMvc.perform(delete(BASE_URL + "/{id}", validBookId)
                 .contentType("application/json"))
                 .andExpect(status().isNoContent());
+
+        mockMvc.perform(get(BASE_URL + "/{id}", validBookId)
+                .contentType("application/json"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("deleteBook - should return NotFound when invalid id is provided")
     public void deleteBookShouldReturnNotFoundWhenInvalidIdIsProvided() throws Exception {
-        Mockito.doThrow(EntityNotFoundException.class).when(bookService).deleteBook(invalidBookId);
-
-        mockMvc.perform(delete(BASE_URL + "/{id}", invalidBookId.toString())
+        mockMvc.perform(delete(BASE_URL + "/{id}", invalidBookId)
                 .contentType("application/json"))
                 .andExpect(status().isNotFound());
     }
