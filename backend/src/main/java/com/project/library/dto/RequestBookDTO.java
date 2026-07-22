@@ -7,7 +7,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record RequestBookDTO(
-        @Schema(description = "Title of the book") @NotBlank(message = "Title must not be blank") @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters") String title,
-        @Schema(description = "Author of the book") @NotBlank(message = "Author must not be blank") @Size(min = 2, max = 100, message = "Author must be between 2 and 100 characters") String author,
-        @Schema(description = "Publication date of the book") LocalDate publishedDate) {
+		@Schema(description = "Title of the book") @NotBlank(message = "Title must not be blank") @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters") String title,
+		@Schema(description = "Author of the book") @NotBlank(message = "Author must not be blank") @Size(min = 2, max = 100, message = "Author must be between 2 and 100 characters") String author,
+		@Schema(description = "Publication date of the book") LocalDate publishedDate) {
+
+	private static String trimWhenNotNull(String value) {
+		if (value != null) {
+			return value.trim();
+		} else {
+			return value;
+		}
+	}
+
+	public RequestBookDTO {
+		title = trimWhenNotNull(title);
+		author = trimWhenNotNull(author);
+	}
 }
