@@ -45,6 +45,7 @@ public class BookController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Book created", content = @Content(schema = @Schema(implementation = ResponseBookDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })
     @PostMapping(produces = "application/json")
@@ -59,6 +60,7 @@ public class BookController {
     @Operation(summary = "Get book by ID", description = "Retrieves a book by its unique identifier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Book found", content = @Content(schema = @Schema(implementation = ResponseBookDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })
@@ -72,6 +74,7 @@ public class BookController {
     @Operation(summary = "Get all books", description = "Retrieves a paginated list of all books in the library")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Books retrieved"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })
     @GetMapping(produces = "application/json")
@@ -84,6 +87,7 @@ public class BookController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Book updated", content = @Content(schema = @Schema(implementation = ResponseBookDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })
@@ -98,6 +102,7 @@ public class BookController {
     @Operation(summary = "Delete a book", description = "Deletes a book from the library")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Book deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })

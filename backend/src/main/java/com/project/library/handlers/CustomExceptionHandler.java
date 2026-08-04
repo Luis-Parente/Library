@@ -5,12 +5,15 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.project.library.dto.CustomErrorDTO;
+import com.project.library.exceptions.DataIntegrityException;
 import com.project.library.exceptions.EntityNotFoundException;
+import com.project.library.exceptions.TokenException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -59,7 +62,8 @@ public class CustomExceptionHandler {
         List<CustomErrorDTO.FieldError> fieldErrors = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> new CustomErrorDTO.FieldError(error.getField(), error.getDefaultMessage()))
+                .map(error -> new CustomErrorDTO.FieldError(error.getField(),
+                        error.getDefaultMessage()))
                 .toList();
 
         CustomErrorDTO dto = new CustomErrorDTO(
@@ -69,6 +73,54 @@ public class CustomExceptionHandler {
                 request.getRequestURI(),
                 fieldErrors);
 
+        return ResponseEntity.status(status).body(dto);
+    }
+
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<CustomErrorDTO> handleToken(TokenException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String message = exception.getMessage();
+
+        CustomErrorDTO dto = new CustomErrorDTO(
+                Instant.now(),
+                status.value(),
+                message,
+                request.getRequestURI(),
+                List.of());
+        return ResponseEntity.status(status).body(dto);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<CustomErrorDTO> handleAuthentication(AuthenticationException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String message = "Invalid username or password";
+
+        CustomErrorDTO dto = new CustomErrorDTO(
+                Instant.now(),
+                status.value(),
+                message,
+                request.getRequestURI(),
+                List.of());
+        return ResponseEntity.status(status).body(dto);
+    }
+
+    @ExceptionHandler(DataIntegrityException.class)
+    public ResponseEntity<CustomErrorDTO> handleDataIntegrity(DataIntegrityException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.CONFLICT;
+        String message = exception.getMessage();
+
+        CustomErrorDTO dto = new CustomErrorDTO(
+                Instant.now(),
+                status.value(),
+                message,
+                request.getRequestURI(),
+                List.of());
         return ResponseEntity.status(status).body(dto);
     }
 }
