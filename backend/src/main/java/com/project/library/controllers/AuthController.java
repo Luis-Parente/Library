@@ -39,11 +39,13 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successfully", content = @Content(schema = @Schema(implementation = ResponseLoginDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class))),
             @ApiResponse(responseCode = "500", description = "Server error", content = @Content(schema = @Schema(implementation = CustomErrorDTO.class)))
     })
     @PostMapping(produces = "application/json")
     public ResponseEntity<ResponseLoginDTO> login(@RequestBody @Valid RequestLoginDTO login) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(login.username(), login.password());
+        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(login.username(),
+                login.password());
         Authentication authentication = authenticationManager.authenticate(usernamePassword);
         ResponseLoginDTO response = tokenService.generateToken((UserDetails) authentication.getPrincipal());
         return ResponseEntity.ok(response);
