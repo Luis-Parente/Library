@@ -4,6 +4,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,12 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
-
-    private final SecurityFilter securityFilter;
-
-    public SecurityConfig(SecurityFilter securityFilter) {
-        this.securityFilter = securityFilter;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +38,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, SecurityFilter securityFilter) throws Exception {
         http.csrf(csrf -> csrf.disable());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(auth -> {
@@ -51,6 +46,7 @@ public class SecurityConfig {
             auth.requestMatchers("/v3/**").permitAll();
             auth.requestMatchers("/auth/login").permitAll();
             auth.requestMatchers("/users").permitAll();
+            auth.requestMatchers(HttpMethod.DELETE, "/books/**").hasAnyRole("ADMIN");
             auth.anyRequest().authenticated();
         });
         http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
